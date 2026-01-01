@@ -1,211 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <title>HUNTER YT DOWNLOADER</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-body{
-  margin:0;
-  background:linear-gradient(135deg,#000,#0a0f2e,#000);
-  color:#fff;
-  font-family:Inter,system-ui;
-}
-header{
-  text-align:center;
-  padding:20px;
-  font-size:32px;
-  font-weight:900;
-  color:#00c8ff;
-}
-.search{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  padding:10px;
-}
-.search input{
-  width:60%;
-  padding:14px;
-  border-radius:12px;
-  border:none;
-  background:#ffffff1a;
-  color:white;
-}
-.search button{
-  padding:14px 20px;
-  border:none;
-  border-radius:12px;
-  background:#00c8ff;
-  color:black;
-  cursor:pointer;
-}
-#history{
-  display:flex;
-  gap:8px;
-  padding:10px;
-  overflow-x:auto;
-}
-.history-item{
-  background:#ffffff1a;
-  padding:6px 12px;
-  border-radius:20px;
-  cursor:pointer;
-  white-space:nowrap;
-}
-#results{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:16px;
-  padding:20px;
-}
-.card{
-  background:#ffffff14;
-  border-radius:16px;
-  overflow:hidden;
-}
-.card img{
-  width:100%;
-  height:160px;
-  object-fit:cover;
-}
-.info{
-  padding:12px;
-}
-.info h3{
-  font-size:14px;
-}
-.controls{
-  display:flex;
-  gap:8px;
-  margin-top:8px;
-}
-.controls button, select{
-  flex:1;
-  padding:8px;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-}
-.preview{
-  background:#ff004c;
-  color:white;
-}
-.download{
-  background:#22c55e;
-}
-#player{
-  display:none;
-  padding:20px;
-}
-iframe{
-  width:100%;
-  height:320px;
-  border-radius:16px;
-}
-footer{
-  text-align:center;
-  padding:20px;
-  color:#aaa;
-}
+body{margin:0;background:#020617;color:#fff;font-family:Arial}
+header{text-align:center;padding:20px;font-size:28px;color:#38bdf8}
+input,button,select{padding:10px;border-radius:8px;border:none}
+.search{display:flex;gap:10px;justify-content:center}
+#results{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:15px;padding:20px}
+.card{background:#020617ee;border:1px solid #38bdf822;border-radius:12px}
+.card img{width:100%;height:150px;object-fit:cover}
+.info{padding:10px}
+button{cursor:pointer}
+.preview{background:#ef4444;color:white}
+.download{background:#22c55e;color:white}
+iframe{width:100%;height:300px;border:none}
 </style>
 </head>
 
 <body>
 
-<header>🎧 HUNTER YT DOWNLOADER</header>
+<header>🎵 HUNTER YT DOWNLOADER</header>
 
 <div class="search">
-  <input id="query" placeholder="Search song or video...">
-  <button onclick="search()">Search</button>
+<input id="q" placeholder="Search song or video">
+<button onclick="search()">Search</button>
 </div>
 
-<div id="history"></div>
-
-<div id="player">
-  <iframe id="frame" allowfullscreen></iframe>
-</div>
-
+<div id="player"></div>
 <div id="results"></div>
 
-<footer>Powered by Obed Tech</footer>
-
 <script>
-let history = JSON.parse(localStorage.getItem("history")||"[]");
-
-function saveHistory(q){
-  if(!history.includes(q)){
-    history.unshift(q);
-    history=history.slice(0,10);
-    localStorage.setItem("history",JSON.stringify(history));
-  }
-  renderHistory();
-}
-
-function renderHistory(){
-  const h=document.getElementById("history");
-  h.innerHTML="";
-  history.forEach(q=>{
-    const d=document.createElement("div");
-    d.className="history-item";
-    d.textContent=q;
-    d.onclick=()=>{document.getElementById("query").value=q;search();}
-    h.appendChild(d);
-  });
-}
-renderHistory();
-
 async function search(){
-  const q=document.getElementById("query").value.trim();
-  if(!q)return alert("Enter a search term");
-  saveHistory(q);
-
-  document.getElementById("results").innerHTML="Loading...";
+  const q=document.getElementById("q").value;
   const res=await fetch(`https://youtubeapi.obedtech.top/functions/v1/youtube-search?q=${encodeURIComponent(q)}`);
   const data=await res.json();
-  const items=data.items||data.results||[];
+  const list=data.items||[];
 
   document.getElementById("results").innerHTML="";
-  items.forEach(v=>{
-    const url=v.url||v.video_url||v.link;
-    const id=url?.split("v=")[1];
-    const card=document.createElement("div");
-    card.className="card";
-    card.innerHTML=`
-      <img src="${v.thumbnail}">
-      <div class="info">
-        <h3>${v.title}</h3>
-        <select id="fmt-${id}">
-          <option value="mp3-128">MP3 128kbps</option>
-          <option value="mp3-320">MP3 320kbps</option>
-          <option value="mp4-360">MP4 360p</option>
-          <option value="mp4-720">MP4 720p</option>
-        </select>
-        <div class="controls">
+  list.forEach(v=>{
+    const url=v.url;
+    const id=url.split("v=")[1];
+    document.getElementById("results").innerHTML+=`
+      <div class="card">
+        <img src="${v.thumbnail}">
+        <div class="info">
+          <b>${v.title}</b><br><br>
+          <select id="f-${id}">
+            <option value="mp3-128">MP3 128</option>
+            <option value="mp3-320">MP3 320</option>
+            <option value="mp4-360">MP4 360p</option>
+            <option value="mp4-720">MP4 720p</option>
+          </select><br><br>
           <button class="preview" onclick="preview('${id}')">Preview</button>
-          <button class="download" onclick="download('${url}','fmt-${id}')">Download</button>
+          <button class="download" onclick="download('${url}','${id}')">Download</button>
         </div>
       </div>`;
-    document.getElementById("results").appendChild(card);
   });
 }
 
 function preview(id){
-  document.getElementById("player").style.display="block";
-  document.getElementById("frame").src=`https://www.youtube.com/embed/${id}`;
-  window.scrollTo({top:0,behavior:"smooth"});
+  document.getElementById("player").innerHTML=
+    `<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`;
 }
 
-/* 🔥 REAL DOWNLOAD HANDLER */
-function download(url,fmtId){
-  const v=document.getElementById(fmtId).value.split("-");
-  const type=v[0], quality=v[1];
-
-  /* CHANGE THIS TO YOUR REAL CONVERTER API */
-  const endpoint=`https://YOUR-DOWNLOADER-ENDPOINT/download?url=${encodeURIComponent(url)}&type=${type}&quality=${quality}`;
-
-  window.open(endpoint,"_blank");
+function download(url,id){
+  const [type,quality]=document.getElementById("f-"+id).value.split("-");
+  window.open(`http://localhost:3000/download?url=${encodeURIComponent(url)}&type=${type}&quality=${quality}`);
 }
 </script>
 
