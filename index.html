@@ -10,12 +10,15 @@
   --bg:#020617;
   --card:#020617ee;
   --accent:#38bdf8;
-  --danger:#ef4444;
   --success:#22c55e;
+  --danger:#ef4444;
   --muted:#94a3b8;
 }
 
-*{box-sizing:border-box;font-family:Inter,system-ui}
+*{
+  box-sizing:border-box;
+  font-family:Inter,system-ui,Arial;
+}
 
 body{
   margin:0;
@@ -25,12 +28,12 @@ body{
 }
 
 header{
-  padding:25px;
   text-align:center;
+  padding:25px;
   font-size:34px;
   font-weight:900;
   color:var(--accent);
-  text-shadow:0 0 20px #38bdf855;
+  text-shadow:0 0 25px #38bdf855;
 }
 
 .search-bar{
@@ -52,13 +55,28 @@ header{
 }
 
 .search-bar button{
-  padding:14px 22px;
+  padding:14px 24px;
   border-radius:14px;
   border:none;
   background:linear-gradient(135deg,#38bdf8,#0ea5e9);
   color:black;
   font-weight:700;
   cursor:pointer;
+}
+
+#history{
+  display:flex;
+  gap:8px;
+  padding:10px 20px;
+  overflow-x:auto;
+}
+
+.history-item{
+  padding:6px 14px;
+  background:#ffffff14;
+  border-radius:20px;
+  cursor:pointer;
+  white-space:nowrap;
 }
 
 #player{
@@ -89,7 +107,9 @@ iframe{
   transition:.3s;
 }
 
-.card:hover{transform:translateY(-4px)}
+.card:hover{
+  transform:translateY(-4px);
+}
 
 .card img{
   width:100%;
@@ -158,57 +178,98 @@ footer{
   <button onclick="search()">Search</button>
 </div>
 
+<div id="history"></div>
+
 <div id="player"></div>
 <div id="results"></div>
 
 <footer>Powered by Obed Tech</footer>
 
 <script>
+/* ---------- SEARCH HISTORY ---------- */
+let history = JSON.parse(localStorage.getItem("yt_history") || "[]");
+
+function saveHistory(q){
+  if(!history.includes(q)){
+    history.unshift(q);
+    history = history.slice(0,10);
+    localStorage.setItem("yt_history",JSON.stringify(history));
+    renderHistory();
+  }
+}
+
+function renderHistory(){
+  const h = document.getElementById("history");
+  h.innerHTML = "";
+  history.forEach(q=>{
+    const d = document.createElement("div");
+    d.className = "history-item";
+    d.textContent = q;
+    d.onclick = ()=>{
+      document.getElementById("query").value = q;
+      search();
+    };
+    h.appendChild(d);
+  });
+}
+renderHistory();
+
+/* ---------- SEARCH ---------- */
 async function search(){
-  const q=document.getElementById("query").value.trim();
-  if(!q) return alert("Enter a search term");
+  const q = document.getElementById("query").value.trim();
+  if(!q) return alert("Enter search term");
 
-  document.getElementById("results").innerHTML="Loading...";
+  saveHistory(q);
+  document.getElementById("results").innerHTML = "Loading...";
 
-  const res=await fetch(`https://youtubeapi.obedtech.top/functions/v1/youtube-search?q=${encodeURIComponent(q)}`);
-  const data=await res.json();
-  const items=data.items||[];
+  const res = await fetch(
+    `https://youtubeapi.obedtech.top/functions/v1/youtube-search?q=${encodeURIComponent(q)}`
+  );
+  const data = await res.json();
+  const items = data.items || data.results || [];
 
-  document.getElementById("results").innerHTML="";
+  document.getElementById("results").innerHTML = "";
+
   items.forEach(v=>{
-    const url=v.url;
-    if(!url) return;
+    if(!v.url) return;
+    const videoId = v.url.split("v=")[1];
 
-    const id=url.split("v=")[1];
-    document.getElementById("results").innerHTML+=`
+    document.getElementById("results").innerHTML += `
       <div class="card">
         <img src="${v.thumbnail}">
         <div class="info">
           <h3>${v.title}</h3>
-          <select id="fmt-${id}">
-            <option value="mp3-128">MP3 128kbps</option>
-            <option value="mp3-320">MP3 320kbps</option>
-            <option value="mp4-360">MP4 360p</option>
-            <option value="mp4-720">MP4 720p</option>
+
+          <select id="fmt-${videoId}">
+            <option value="mp3">MP3 (Audio)</option>
+            <option value="mp4">MP4 (Video)</option>
           </select>
+
           <div class="buttons">
-            <button class="preview" onclick="preview('${id}')">Preview</button>
-            <button class="download" onclick="download('${url}','${id}')">Download</button>
+            <button class="preview" onclick="preview('${videoId}')">Preview</button>
+            <button class="download" onclick="download('${v.url}','${videoId}')">Download</button>
           </div>
         </div>
-      </div>`;
+      </div>
+    `;
   });
 }
 
+/* ---------- PREVIEW ---------- */
 function preview(id){
-  document.getElementById("player").innerHTML=
+  document.getElementById("player").innerHTML =
     `<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`;
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
+/* ---------- DOWNLOAD ---------- */
 function download(url,id){
-  const [type,quality]=document.getElementById("fmt-"+id).value.split("-");
-  window.open(`http://localhost:3000/download?url=${encodeURIComponent(url)}&type=${type}&quality=${quality}`);
+  const format = document.getElementById("fmt-"+id).value;
+
+  const endpoint =
+    `https://youtubeapi.obedtech.top/functions/v1/youtube-download?url=${encodeURIComponent(url)}&type=${format}`;
+
+  window.open(endpoint,"_blank");
 }
 </script>
 
