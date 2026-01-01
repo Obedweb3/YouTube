@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HUNTER YT DOWNLOADER</title>
+
+<style>
+/* ===== GLOBAL ===== */
+* {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg,#000,#0a0f2c,#000);
+  background-size: 400% 400%;
+  animation: bg 12s ease infinite;
+  color: #fff;
+}
+
+@keyframes bg {
+  0% {background-position:0% 50%;}
+  50% {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+
+/* ===== HEADER ===== */
+header {
+  padding: 20px;
+  text-align: center;
+  font-size: 30px;
+  font-weight: 900;
+  text-shadow: 0 0 15px #00c8ff;
+}
+
+/* ===== SEARCH ===== */
+.search-box {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  flex-wrap: wrap;
+}
+
+.search-box input {
+  width: 60%;
+  min-width: 260px;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  background: rgba(255,255,255,0.12);
+  color: white;
+}
+
+.search-box button {
+  padding: 15px 25px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  background: linear-gradient(90deg,#0078ff,#00c8ff);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(0,200,255,0.5);
+}
+
+/* ===== RESULTS GRID ===== */
+#results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+  gap: 20px;
+  padding: 25px;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0,200,255,0.25);
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.03);
+}
+
+.card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.card .info {
+  padding: 15px;
+}
+
+.card h3 {
+  font-size: 16px;
+  margin: 0 0 6px;
+}
+
+.card p {
+  font-size: 13px;
+  color: #ccc;
+  margin: 0 0 10px;
+}
+
+/* ===== DOWNLOAD BUTTONS ===== */
+.downloads button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: white;
+}
+
+.video-btn {
+  background: linear-gradient(90deg,#ff004c,#ff6a00);
+}
+
+.audio-btn {
+  background: linear-gradient(90deg,#22c55e,#16a34a);
+}
+
+/* ===== FOOTER ===== */
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #aaa;
+  font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<header>🎬 HUNTER YT DOWNLOADER</header>
+
+<div class="search-box">
+  <input id="query" placeholder="Search YouTube video..." />
+  <button onclick="searchYT()">Search</button>
+</div>
+
+<div id="results"></div>
+
+<footer>Powered by Obed Tech</footer>
+
+<script>
+async function searchYT() {
+  const q = document.getElementById("query").value.trim();
+  if (!q) return alert("Enter a search term");
+
+  document.getElementById("results").innerHTML = "Loading...";
+
+  try {
+    const res = await fetch(
+      `https://youtubeapi.obedtech.top/functions/v1/youtube-search?q=${encodeURIComponent(q)}`
+    );
+    const data = await res.json();
+
+    // Try common structures
+    const items =
+      data.items ||
+      data.results ||
+      data.videos ||
+      [];
+
+    renderResults(items);
+  } catch (err) {
+    alert("Failed to fetch videos");
+    console.error(err);
+  }
+}
+
+function renderResults(videos) {
+  const container = document.getElementById("results");
+  container.innerHTML = "";
+
+  videos.forEach(v => {
+    const title = v.title || "Untitled";
+    const thumb = v.thumbnail || v.thumbnail_url || v.thumb;
+    const channel = v.channel || v.author || "Unknown";
+    const videoUrl = v.video_url || v.url || v.link;
+    const audioUrl = v.audio_url || v.audio || null;
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <img src="${thumb}">
+      <div class="info">
+        <h3>${title}</h3>
+        <p>${channel}</p>
+        <div class="downloads">
+          ${videoUrl ? `<button class="video-btn" onclick="download('${videoUrl}')">Download Video</button>` : ""}
+          ${audioUrl ? `<button class="audio-btn" onclick="download('${audioUrl}')">Download Audio</button>` : ""}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+function download(url) {
+  window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
