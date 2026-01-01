@@ -2,151 +2,129 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HUNTER YT DOWNLOADER</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ===== GLOBAL ===== */
-* {
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+body{
+  margin:0;
+  background:linear-gradient(135deg,#000,#0a0f2e,#000);
+  color:#fff;
+  font-family:Inter,system-ui;
 }
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: linear-gradient(135deg,#000,#0a0f2c,#000);
-  background-size: 400% 400%;
-  animation: bg 12s ease infinite;
-  color: #fff;
+header{
+  text-align:center;
+  padding:20px;
+  font-size:32px;
+  font-weight:900;
+  color:#00c8ff;
 }
-
-@keyframes bg {
-  0% {background-position:0% 50%;}
-  50% {background-position:100% 50%;}
-  100% {background-position:0% 50%;}
+.search{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  padding:10px;
 }
-
-/* ===== HEADER ===== */
-header {
-  padding: 20px;
-  text-align: center;
-  font-size: 30px;
-  font-weight: 900;
-  text-shadow: 0 0 15px #00c8ff;
+.search input{
+  width:60%;
+  padding:14px;
+  border-radius:12px;
+  border:none;
+  background:#ffffff1a;
+  color:white;
 }
-
-/* ===== SEARCH ===== */
-.search-box {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  padding: 20px;
-  flex-wrap: wrap;
+.search button{
+  padding:14px 20px;
+  border:none;
+  border-radius:12px;
+  background:#00c8ff;
+  color:black;
+  cursor:pointer;
 }
-
-.search-box input {
-  width: 60%;
-  min-width: 260px;
-  padding: 15px;
-  border-radius: 12px;
-  border: none;
-  outline: none;
-  font-size: 16px;
-  background: rgba(255,255,255,0.12);
-  color: white;
+#history{
+  display:flex;
+  gap:8px;
+  padding:10px;
+  overflow-x:auto;
 }
-
-.search-box button {
-  padding: 15px 25px;
-  border-radius: 12px;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  background: linear-gradient(90deg,#0078ff,#00c8ff);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(0,200,255,0.5);
+.history-item{
+  background:#ffffff1a;
+  padding:6px 12px;
+  border-radius:20px;
+  cursor:pointer;
+  white-space:nowrap;
 }
-
-/* ===== RESULTS GRID ===== */
-#results {
-  display: grid;
-  grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
-  gap: 20px;
-  padding: 25px;
+#results{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:16px;
+  padding:20px;
 }
-
-/* ===== CARD ===== */
-.card {
-  background: rgba(255,255,255,0.08);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 0 15px rgba(0,200,255,0.25);
-  transition: 0.3s;
+.card{
+  background:#ffffff14;
+  border-radius:16px;
+  overflow:hidden;
 }
-
-.card:hover {
-  transform: scale(1.03);
+.card img{
+  width:100%;
+  height:160px;
+  object-fit:cover;
 }
-
-.card img {
-  width: 100%;
-  height: 160px;
-  object-fit: cover;
+.info{
+  padding:12px;
 }
-
-.card .info {
-  padding: 15px;
+.info h3{
+  font-size:14px;
 }
-
-.card h3 {
-  font-size: 16px;
-  margin: 0 0 6px;
+.controls{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
 }
-
-.card p {
-  font-size: 13px;
-  color: #ccc;
-  margin: 0 0 10px;
+.controls button, select{
+  flex:1;
+  padding:8px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
-
-/* ===== DOWNLOAD BUTTONS ===== */
-.downloads button {
-  width: 100%;
-  margin-top: 8px;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  color: white;
+.preview{
+  background:#ff004c;
+  color:white;
 }
-
-.video-btn {
-  background: linear-gradient(90deg,#ff004c,#ff6a00);
+.download{
+  background:#22c55e;
 }
-
-.audio-btn {
-  background: linear-gradient(90deg,#22c55e,#16a34a);
+#player{
+  display:none;
+  padding:20px;
 }
-
-/* ===== FOOTER ===== */
-footer {
-  text-align: center;
-  padding: 20px;
-  color: #aaa;
-  font-size: 14px;
+iframe{
+  width:100%;
+  height:320px;
+  border-radius:16px;
+}
+footer{
+  text-align:center;
+  padding:20px;
+  color:#aaa;
 }
 </style>
 </head>
 
 <body>
 
-<header>🎬 HUNTER YT DOWNLOADER</header>
+<header>🎧 HUNTER YT DOWNLOADER</header>
 
-<div class="search-box">
-  <input id="query" placeholder="Search YouTube video..." />
-  <button onclick="searchYT()">Search</button>
+<div class="search">
+  <input id="query" placeholder="Search song or video...">
+  <button onclick="search()">Search</button>
+</div>
+
+<div id="history"></div>
+
+<div id="player">
+  <iframe id="frame" allowfullscreen></iframe>
 </div>
 
 <div id="results"></div>
@@ -154,64 +132,80 @@ footer {
 <footer>Powered by Obed Tech</footer>
 
 <script>
-async function searchYT() {
-  const q = document.getElementById("query").value.trim();
-  if (!q) return alert("Enter a search term");
+let history = JSON.parse(localStorage.getItem("history")||"[]");
 
-  document.getElementById("results").innerHTML = "Loading...";
-
-  try {
-    const res = await fetch(
-      `https://youtubeapi.obedtech.top/functions/v1/youtube-search?q=${encodeURIComponent(q)}`
-    );
-    const data = await res.json();
-
-    // Try common structures
-    const items =
-      data.items ||
-      data.results ||
-      data.videos ||
-      [];
-
-    renderResults(items);
-  } catch (err) {
-    alert("Failed to fetch videos");
-    console.error(err);
+function saveHistory(q){
+  if(!history.includes(q)){
+    history.unshift(q);
+    history=history.slice(0,10);
+    localStorage.setItem("history",JSON.stringify(history));
   }
+  renderHistory();
 }
 
-function renderResults(videos) {
-  const container = document.getElementById("results");
-  container.innerHTML = "";
+function renderHistory(){
+  const h=document.getElementById("history");
+  h.innerHTML="";
+  history.forEach(q=>{
+    const d=document.createElement("div");
+    d.className="history-item";
+    d.textContent=q;
+    d.onclick=()=>{document.getElementById("query").value=q;search();}
+    h.appendChild(d);
+  });
+}
+renderHistory();
 
-  videos.forEach(v => {
-    const title = v.title || "Untitled";
-    const thumb = v.thumbnail || v.thumbnail_url || v.thumb;
-    const channel = v.channel || v.author || "Unknown";
-    const videoUrl = v.video_url || v.url || v.link;
-    const audioUrl = v.audio_url || v.audio || null;
+async function search(){
+  const q=document.getElementById("query").value.trim();
+  if(!q)return alert("Enter a search term");
+  saveHistory(q);
 
-    const card = document.createElement("div");
-    card.className = "card";
+  document.getElementById("results").innerHTML="Loading...";
+  const res=await fetch(`https://youtubeapi.obedtech.top/functions/v1/youtube-search?q=${encodeURIComponent(q)}`);
+  const data=await res.json();
+  const items=data.items||data.results||[];
 
-    card.innerHTML = `
-      <img src="${thumb}">
+  document.getElementById("results").innerHTML="";
+  items.forEach(v=>{
+    const url=v.url||v.video_url||v.link;
+    const id=url?.split("v=")[1];
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`
+      <img src="${v.thumbnail}">
       <div class="info">
-        <h3>${title}</h3>
-        <p>${channel}</p>
-        <div class="downloads">
-          ${videoUrl ? `<button class="video-btn" onclick="download('${videoUrl}')">Download Video</button>` : ""}
-          ${audioUrl ? `<button class="audio-btn" onclick="download('${audioUrl}')">Download Audio</button>` : ""}
+        <h3>${v.title}</h3>
+        <select id="fmt-${id}">
+          <option value="mp3-128">MP3 128kbps</option>
+          <option value="mp3-320">MP3 320kbps</option>
+          <option value="mp4-360">MP4 360p</option>
+          <option value="mp4-720">MP4 720p</option>
+        </select>
+        <div class="controls">
+          <button class="preview" onclick="preview('${id}')">Preview</button>
+          <button class="download" onclick="download('${url}','fmt-${id}')">Download</button>
         </div>
-      </div>
-    `;
-
-    container.appendChild(card);
+      </div>`;
+    document.getElementById("results").appendChild(card);
   });
 }
 
-function download(url) {
-  window.open(url, "_blank");
+function preview(id){
+  document.getElementById("player").style.display="block";
+  document.getElementById("frame").src=`https://www.youtube.com/embed/${id}`;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* 🔥 REAL DOWNLOAD HANDLER */
+function download(url,fmtId){
+  const v=document.getElementById(fmtId).value.split("-");
+  const type=v[0], quality=v[1];
+
+  /* CHANGE THIS TO YOUR REAL CONVERTER API */
+  const endpoint=`https://YOUR-DOWNLOADER-ENDPOINT/download?url=${encodeURIComponent(url)}&type=${type}&quality=${quality}`;
+
+  window.open(endpoint,"_blank");
 }
 </script>
 
